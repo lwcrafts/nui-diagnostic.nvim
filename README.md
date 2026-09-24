@@ -26,7 +26,7 @@ A small Neovim plugin that jumps between diagnostics and shows the current diagn
 
 ```lua
 {
-    "iilw/nui-diagnostic.nvim",
+    "lwcrafts/nui-diagnostic.nvim",
     opts = {}
 }
 ```
@@ -35,7 +35,7 @@ A small Neovim plugin that jumps between diagnostics and shows the current diagn
 
 ```lua
 vim.pack.add({
-  "https://github.com/iilw/nui-diagnostic.nvim",
+  "https://github.com/lwcrafts/nui-diagnostic.nvim",
 })
 
 require("nui-diagnostic").setup({})
