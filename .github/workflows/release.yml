@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*' # 监听所有 tag 推送。如果你习惯用 v 开头，可以改为 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 允许 GITHUB_TOKEN 创建 Release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract release notes
+        id: extract
+        run: |
+          # 提取当前 tag 的版本号（去掉前面的 refs/tags/ 以及可能存在的 v 前缀）
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG_NAME#v}
+          
+          # 使用 awk 从 CHANGELOG.md 提取对应版本的更新日志
+          awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (match($0, "^## \\[" ver "\\]")) {
+                flag=1
+                next
+              } else if (flag) {
+                exit
+              }
+            }
+            flag { print }
+          ' CHANGELOG.md > release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md # 使用提取出来的内容作为 Release Notes
