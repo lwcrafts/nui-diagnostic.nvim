@@ -25,14 +25,18 @@ function M.format(diagnostic, opts)
   local suffix = ""
 
   if diagnostic.code then
-    suffix = suffix .. string.format("#%s", diagnostic.code)
+    suffix = suffix .. string.format("[%s]", diagnostic.code)
   end
 
-  if diagnostic.source and diagnostic.source ~= "" then
-    suffix = suffix .. string.format(" [%s]",diagnostic.source)
+  -- if diagnostic.source and diagnostic.source ~= "" then
+  --   suffix = suffix .. string.format(" [%s]",diagnostic.source)
+  -- end
+
+  if suffix ~= "" then
+    return string.format("%s %s", message, suffix)
   end
 
-  return string.format(" %s: %s%s", severity, message, suffix)
+  return message
 end
 
 --- @param diagnostics vim.Diagnostic[]

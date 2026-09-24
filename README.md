@@ -1,6 +1,6 @@
 # nui-diagnostic.nvim
 
-A small Neovim plugin that jumps between diagnostics and shows the current diagnostic together with available LSP code actions in `nui.nvim` popups.
+A small Neovim plugin that jumps between diagnostics and shows the current diagnostic together with available LSP code actions in floating popups.
 
 ![nui-diagnostic-gif](https://github.com/user-attachments/assets/ba5e4cc7-7828-4486-89a8-646ca3710deb)
 
@@ -18,7 +18,6 @@ A small Neovim plugin that jumps between diagnostics and shows the current diagn
 ## Requirements
 
 - Neovim 0.10+
-- [`nui.nvim`](https://github.com/MunifTanjim/nui.nvim)
 - An LSP client that publishes diagnostics and/or code actions
 
 ## Installation
@@ -28,7 +27,6 @@ A small Neovim plugin that jumps between diagnostics and shows the current diagn
 ```lua
 {
     "iilw/nui-diagnostic.nvim",
-    dependencies = { "MunifTanjim/nui.nvim" },
     opts = {}
 }
 ```
@@ -37,7 +35,6 @@ A small Neovim plugin that jumps between diagnostics and shows the current diagn
 
 ```lua
 vim.pack.add({
-  "https://github.com/MunifTanjim/nui.nvim",
   "https://github.com/iilw/nui-diagnostic.nvim",
 })
 

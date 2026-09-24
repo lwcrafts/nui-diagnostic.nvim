@@ -1,6 +1,5 @@
 local config = require("nui-diagnostic.config")
 local diagnostic = require("nui-diagnostic.diagnostic")
-local Popup = require("nui.popup")
 
 local M = {}
 
@@ -67,31 +66,43 @@ end
 local function make_popup(lines, width, row, title, opts, anchor)
   local height = math.min(#lines, opts.popup.max_height)
 
-  local popup = Popup({
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+
+  local win_opts = {
     relative = "cursor",
     anchor = anchor,
-    position = {
-      col = opts.popup.position.col,
-      row = row
-    },
-    size = {
-      width = width,
-      height = height
-    },
-    border = {
-      style = opts.popup.border_style,
-      text = {
-        top = title,
-        top_align = "left"
-      }
-    },
-    win_options = opts.popup.win_options
-  })
+    row = row,
+    col = opts.popup.position.col,
+    width = width,
+    height = height,
+    style = "minimal",
+    border = opts.popup.border_style,
+  }
 
-  popup:mount()
-  vim.api.nvim_buf_set_lines(popup.bufnr, 0, -1, false, lines)
+  if title then
+    win_opts.title = { { title, "FloatTitle" } }
+    win_opts.title_pos = "left"
+  end
 
-  return popup
+  local winid = vim.api.nvim_open_win(bufnr, false, win_opts)
+
+  for k, v in pairs(opts.popup.win_options or {}) do
+    vim.api.nvim_set_option_value(k, v, { win = winid })
+  end
+
+  return {
+    bufnr = bufnr,
+    winid = winid,
+    unmount = function(self)
+      if vim.api.nvim_win_is_valid(self.winid) then
+        vim.api.nvim_win_close(self.winid, true)
+      end
+      if vim.api.nvim_buf_is_valid(self.bufnr) then
+        vim.api.nvim_buf_delete(self.bufnr, { force = true })
+      end
+    end
+  }
 end
 
 ---@param actions NuiDiagnosticActionTuple[]
@@ -106,10 +117,6 @@ local function action_lines(actions, keys)
     end
 
     table.insert(lines, string.format(" [%s] %s", key, action_tuple.action.title or "Untitled action"))
-  end
-
-  if #lines == 0 then
-    table.insert(lines, "No code actions")
   end
 
   return lines
@@ -192,6 +199,31 @@ function M.open(opts)
   if #diag_lines > 0 then
     local popup = make_popup(diag_lines, width, placement.diag_row, "Diagnostic ", plugin_opts, placement.anchor)
     table.insert(state.popups, popup)
+
+    local ns_id = vim.api.nvim_create_namespace("nui-diagnostic")
+    local hl_map = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticHint",
+    }
+    for i, d in ipairs(diagnostics) do
+      if plugin_opts.diagnostics.max_items and i > plugin_opts.diagnostics.max_items then break end
+      local hl_group = hl_map[d.severity]
+      if hl_group then
+        local message_text = diagnostic.one_line(d.message)
+        local line_text = diag_lines[i]
+        if line_text and message_text and message_text ~= "" then
+          local s, e = string.find(line_text, message_text, 1, true)
+          if s and e then
+            vim.api.nvim_buf_set_extmark(popup.bufnr, ns_id, i - 1, s - 1, {
+              end_col = e,
+              hl_group = hl_group,
+            })
+          end
+        end
+      end
+    end
   end
 
   if #code_action_lines > 0 then

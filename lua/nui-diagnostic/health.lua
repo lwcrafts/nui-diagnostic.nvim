@@ -1,11 +1,5 @@
 local M = {}
 
-local function has_module(name)
-  local ok = pcall(require, name)
-  return ok
-end
-
-
 function M.check()
   vim.health.start("nui-diagnostic.nvim")
 
@@ -15,11 +9,7 @@ function M.check()
     vim.health.warn("Neovim >= 0.10 is recommended")
   end
 
-  if has_module("nui.popup") then
-    vim.health.ok("nui.nvim is available")
-  else
-    vim.health.warn("nui.nvim is required but was not found on runtimepath")
-  end
+
 
   local clients = vim.lsp.get_clients({ bufnr = vim.api.nvim_get_current_buf() })
   if #clients > 0 then
@@ -36,3 +26,4 @@ function M.check()
 end
 
 return M
+

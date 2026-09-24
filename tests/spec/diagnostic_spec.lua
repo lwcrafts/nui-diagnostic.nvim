@@ -30,7 +30,7 @@ describe("nui-diagnostic.diagnostic", function()
       source = "lua_ls",
     })
 
-    assert.are.same(" ERROR: unused variable#W123 [lua_ls]", line)
+    assert.are.same("unused variable [W123]", line)
   end)
 
   it("omits empty source", function()
@@ -40,7 +40,7 @@ describe("nui-diagnostic.diagnostic", function()
       source = "",
     })
 
-    assert.are.same(" WARN: warning", line)
+    assert.are.same("warning", line)
   end)
 
   it("uses a fallback label for unknown severity", function()
@@ -49,7 +49,7 @@ describe("nui-diagnostic.diagnostic", function()
       message = "message",
     })
 
-    assert.are.same(" DIAGNOSTIC: message", line)
+    assert.are.same("message", line)
   end)
 
   it("supports custom formatting", function()
@@ -67,7 +67,7 @@ describe("nui-diagnostic.diagnostic", function()
       { severity = vim.diagnostic.severity.INFO, message = "info" },
     })
 
-    assert.are.same({ " INFO: info" }, lines)
+    assert.are.same({ "info" }, lines)
   end)
 
   it("renders multiple diagnostics with indexes", function()
@@ -77,8 +77,8 @@ describe("nui-diagnostic.diagnostic", function()
     })
 
     assert.are.same({
-      " [1] ERROR: first",
-      " [2] HINT: second",
+      " [1]first",
+      " [2]second",
     }, lines)
   end)
 
@@ -88,6 +88,6 @@ describe("nui-diagnostic.diagnostic", function()
       { severity = vim.diagnostic.severity.WARN, message = "second" },
     }, { max_items = 1 })
 
-    assert.are.same({ " [1] DIAGNOSTIC: first" }, lines)
+    assert.are.same({ " [1]first" }, lines)
   end)
 end)
